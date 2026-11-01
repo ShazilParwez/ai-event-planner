@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd frontend && npx --yes pnpm@9.15.9 run build",
+  "buildCommand": "cd frontend && pnpm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npx --yes pnpm@9.15.9 install --frozen-lockfile",
+  "installCommand": "npm install -g pnpm && cd frontend && pnpm install",
   "framework": "vite",
   "rewrites": [
     {
