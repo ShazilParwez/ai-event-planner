@@ -1,0 +1,24 @@
+# ==============================================================================
+# AI Event Planner - Local Development Docker Compose Override Example
+# Copy this file to docker-compose.override.yml if you need direct host access
+# to PostgreSQL (port 5432) or FastAPI (port 8000) during development.
+# ==============================================================================
+
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  backend:
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./backend/app:/app/app:ro
+
+  frontend:
+    ports:
+      - "5173:80"
+

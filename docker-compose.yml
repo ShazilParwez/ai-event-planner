@@ -1,0 +1,135 @@
+# ==============================================================================
+# AI Event Planner - Production Container Orchestration
+# Architecture:
+#   - db: PostgreSQL 16 Alpine on isolated db_network
+#   - backend: FastAPI + psycopg 3 with liveness health check
+#   - frontend: React SPA built static assets served by Alpine Nginx
+#   - gateway: Pinned Nginx reverse proxy providing single-origin access
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL 16 Database
+  # ----------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: ai_event_planner_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-event_planner_db}
+      POSTGRES_USER: ${POSTGRES_USER:-event_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-event_secure_db_pass_replace_in_prod}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-event_user} -d ${POSTGRES_DB:-event_planner_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - db_network
+
+  # ----------------------------------------------------------------------------
+  # 2. FastAPI Backend
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai_event_planner_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SECRET_KEY: ${SECRET_KEY:-change-this-in-production-use-a-strong-random-key-32-chars-min}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost,http://localhost:80,http://127.0.0.1,http://127.0.0.1:80}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-event_user}:${POSTGRES_PASSWORD:-event_secure_db_pass_replace_in_prod}@db:5432/${POSTGRES_DB:-event_planner_db}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-20}
+      DB_POOL_RECYCLE: ${DB_POOL_RECYCLE:-1800}
+      DB_POOL_PRE_PING: "true"
+      USE_MOCK_AI: ${USE_MOCK_AI:-true}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      AI_REQUEST_TIMEOUT_SECONDS: ${AI_REQUEST_TIMEOUT_SECONDS:-15}
+      AI_MAX_RETRIES: ${AI_MAX_RETRIES:-3}
+    volumes:
+      - backend_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - db_network
+      - web_network
+
+  # ----------------------------------------------------------------------------
+  # 3. Frontend Static Asset Service
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ai_event_planner_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:80/healthz || exit 1"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - web_network
+
+  # ----------------------------------------------------------------------------
+  # 4. Nginx Reverse Proxy Gateway (Single Public Entrypoint)
+  # ----------------------------------------------------------------------------
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: ai_event_planner_gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:80/healthz || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - web_network
+
+volumes:
+  postgres_data:
+    name: ai_event_planner_postgres_data
+    driver: local
+  backend_data:
+    name: ai_event_planner_backend_data
+    driver: local
+
+networks:
+  # Isolated private network for database communication (not publicly reachable)
+  db_network:
+    name: ai_event_planner_db_network
+    driver: bridge
+  # Internal web network connecting reverse proxy gateway to backend & frontend
+  web_network:
+    name: ai_event_planner_web_network
+    driver: bridge

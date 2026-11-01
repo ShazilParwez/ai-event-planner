@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+}
+
+/* ==========================================================================
+   Accessibility Enhancements
+   ========================================================================== */
+
+/* 1. Dyslexia-Friendly Reading Mode */
+html.dyslexia-mode,
+.dyslexia-mode body,
+.dyslexia-mode p,
+.dyslexia-mode span,
+.dyslexia-mode div,
+.dyslexia-mode button,
+.dyslexia-mode input,
+.dyslexia-mode textarea,
+.dyslexia-mode select,
+.dyslexia-mode h1,
+.dyslexia-mode h2,
+.dyslexia-mode h3,
+.dyslexia-mode h4,
+.dyslexia-mode h5,
+.dyslexia-mode h6 {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.12em !important;
+  line-height: 1.75 !important;
+}
+
+/* 2. High-Contrast Display Mode (WCAG AAA Compliance) */
+html.high-contrast {
+  filter: contrast(1.2);
+}
+
+html.high-contrast body {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+html.high-contrast button,
+html.high-contrast a,
+html.high-contrast input,
+html.high-contrast select,
+html.high-contrast textarea {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+html.high-contrast button:focus-visible,
+html.high-contrast a:focus-visible,
+html.high-contrast input:focus-visible,
+html.high-contrast select:focus-visible,
+html.high-contrast textarea:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 3px !important;
+}
+
+html.high-contrast .bg-slate-50,
+html.high-contrast .bg-slate-100 {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+html.high-contrast .text-slate-400,
+html.high-contrast .text-slate-500,
+html.high-contrast .text-slate-600 {
+  color: #1a1a1a !important;
+}
+
+/* 3. Universal Focus Indicators */
+:focus-visible {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 2px !important;
+}
+
+/* 4. Screen-Reader-Only Utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+

@@ -1,0 +1,6023 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Event Planner API",
+    "description": "Production-grade GenAI-powered Event Planning Assistant API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/healthz": {
+      "get": {
+        "tags": [
+          "Health & Monitoring"
+        ],
+        "summary": "Liveness Check",
+        "description": "Basic liveness probe for container orchestrators.",
+        "operationId": "liveness_check_api_v1_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readyz": {
+      "get": {
+        "tags": [
+          "Health & Monitoring"
+        ],
+        "summary": "Readiness Check",
+        "description": "Readiness probe verifying DB connectivity and AI copilot readiness.",
+        "operationId": "readiness_check_api_v1_readyz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Create Event",
+        "description": "Creates a new event with deterministic defaults and ISO currency validation.",
+        "operationId": "create_event_api_v1_events_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List Events",
+        "description": "Lists events with filtering, search, and offset/limit pagination.",
+        "operationId": "list_events_api_v1_events_get",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EventType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EventStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_List_EventResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/with-ai-plan": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Create Event With Ai Plan",
+        "description": "Creates an event and automatically bootstraps budget categories, milestones, and checklists using AI Copilot.",
+        "operationId": "create_event_with_ai_plan_api_v1_events_with_ai_plan_post",
+        "parameters": [
+          {
+            "name": "guest_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5000,
+              "minimum": 1,
+              "default": 50,
+              "title": "Guest Count"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/paginated": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "List Events Paginated",
+        "description": "Returns paginated event listing with total count and page metadata.",
+        "operationId": "list_events_paginated_api_v1_events_paginated_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EventType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EventStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventPaginationResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Get Event",
+        "description": "Retrieves a single event by ID or returns 404.",
+        "operationId": "get_event_api_v1_events__event_id__get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Update Event",
+        "description": "Updates an existing event with validated inputs.",
+        "operationId": "update_event_api_v1_events__event_id__put",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Delete Event",
+        "description": "Deletes an event and cascades to associated entities.",
+        "operationId": "delete_event_api_v1_events__event_id__delete",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/copilot/generate-plan": {
+      "post": {
+        "tags": [
+          "AI Event Copilot"
+        ],
+        "summary": "Generate Event Plan",
+        "description": "Generates a complete event blueprint using Gemini with schema enforcement and deterministic fallback.",
+        "operationId": "generate_event_plan_api_v1_copilot_generate_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AICopilotEventGenerationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_AICopilotFullPlanResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/copilot/budget-recommendation": {
+      "get": {
+        "tags": [
+          "AI Event Copilot"
+        ],
+        "summary": "Get Budget Recommendation",
+        "description": "Recommends category budget distribution percentages based on event type.",
+        "operationId": "get_budget_recommendation_api_v1_copilot_budget_recommendation_get",
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EventType"
+            }
+          },
+          {
+            "name": "target_budget",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "title": "Target Budget"
+            }
+          },
+          {
+            "name": "guest_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50,
+              "title": "Guest Count"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_AIBudgetPlanResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/copilot/timeline-recommendation": {
+      "get": {
+        "tags": [
+          "AI Event Copilot"
+        ],
+        "summary": "Get Timeline Recommendation",
+        "description": "Recommends phased planning milestones and sample day-of schedule.",
+        "operationId": "get_timeline_recommendation_api_v1_copilot_timeline_recommendation_get",
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EventType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_AITimelinePlanResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/copilot/chat": {
+      "post": {
+        "tags": [
+          "AI Event Copilot"
+        ],
+        "summary": "Chat Copilot",
+        "description": "Contextual event copilot chat assistant.",
+        "operationId": "chat_copilot_api_v1_copilot_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AICopilotChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_AICopilotChatResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget": {
+      "get": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Get Event Budget Overview",
+        "description": "Retrieves deterministic mathematical breakdown of event budget, allocations, costs, utilization, and variance.",
+        "operationId": "get_event_budget_overview_api_v1_events__event_id__budget_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetOverviewResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget/categories": {
+      "get": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "List Budget Categories",
+        "description": "Lists all budget categories for a specific event.",
+        "operationId": "list_budget_categories_api_v1_events__event_id__budget_categories_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_List_BudgetCategoryResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Add Budget Category",
+        "description": "Creates a new budget category for the specified event.",
+        "operationId": "add_budget_category_api_v1_events__event_id__budget_categories_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCategoryCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetCategoryResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget/categories/{category_id}": {
+      "put": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Update Budget Category",
+        "description": "Updates an existing budget category.",
+        "operationId": "update_budget_category_api_v1_events__event_id__budget_categories__category_id__put",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCategoryUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetCategoryResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Delete Budget Category",
+        "description": "Safely deletes a budget category. Rejects deletion if items exist unless force=True.",
+        "operationId": "delete_budget_category_api_v1_events__event_id__budget_categories__category_id__delete",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set True to force delete category and all associated items",
+              "default": false,
+              "title": "Force"
+            },
+            "description": "Set True to force delete category and all associated items"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget/categories/seed": {
+      "post": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Seed Default Budget Categories",
+        "description": "Seeds suggested industry-standard budget categories calculated against the event's target budget.",
+        "operationId": "seed_default_budget_categories_api_v1_events__event_id__budget_categories_seed_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_SeedCategoriesResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget/items": {
+      "get": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "List Budget Items",
+        "description": "Lists budget items for an event, optionally filtered by category.",
+        "operationId": "list_budget_items_api_v1_events__event_id__budget_items_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_List_BudgetItemResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Add Budget Item",
+        "description": "Adds a new budget expense item under an event category with cross-event isolation.",
+        "operationId": "add_budget_item_api_v1_events__event_id__budget_items_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetItemResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/budget/items/{item_id}": {
+      "put": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Update Event Budget Item",
+        "description": "Updates a budget item under a specific event.",
+        "operationId": "update_event_budget_item_api_v1_events__event_id__budget_items__item_id__put",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetItemResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Delete Event Budget Item",
+        "description": "Deletes a budget item under a specific event.",
+        "operationId": "delete_event_budget_item_api_v1_events__event_id__budget_items__item_id__delete",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/budget/items/{item_id}": {
+      "put": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Update Budget Item Direct",
+        "operationId": "update_budget_item_direct_api_v1_budget_items__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_BudgetItemResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Budget Intelligence"
+        ],
+        "summary": "Delete Budget Item Direct",
+        "operationId": "delete_budget_item_direct_api_v1_budget_items__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/timeline": {
+      "get": {
+        "tags": [
+          "Timeline Management"
+        ],
+        "summary": "Get Event Timeline",
+        "operationId": "get_event_timeline_api_v1_events__event_id__timeline_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_TimelineOverviewResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/timeline/milestones": {
+      "post": {
+        "tags": [
+          "Timeline Management"
+        ],
+        "summary": "Create Milestone",
+        "operationId": "create_milestone_api_v1_events__event_id__timeline_milestones_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelineMilestoneCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_TimelineMilestoneResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/timeline/milestones/{milestone_id}": {
+      "put": {
+        "tags": [
+          "Timeline Management"
+        ],
+        "summary": "Update Milestone",
+        "operationId": "update_milestone_api_v1_timeline_milestones__milestone_id__put",
+        "parameters": [
+          {
+            "name": "milestone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Milestone Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelineMilestoneUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_TimelineMilestoneResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/timeline/activities": {
+      "post": {
+        "tags": [
+          "Timeline Management"
+        ],
+        "summary": "Add Activity",
+        "operationId": "add_activity_api_v1_events__event_id__timeline_activities_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimelineActivityCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_TimelineActivityResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/vendors": {
+      "get": {
+        "tags": [
+          "Vendor Management"
+        ],
+        "summary": "Get Event Vendors",
+        "operationId": "get_event_vendors_api_v1_events__event_id__vendors_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_VendorSummaryResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Vendor Management"
+        ],
+        "summary": "Add Vendor Item",
+        "operationId": "add_vendor_item_api_v1_events__event_id__vendors_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_VendorItemResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendors/{vendor_id}": {
+      "put": {
+        "tags": [
+          "Vendor Management"
+        ],
+        "summary": "Update Vendor Item",
+        "operationId": "update_vendor_item_api_v1_vendors__vendor_id__put",
+        "parameters": [
+          {
+            "name": "vendor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vendor Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_VendorItemResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Vendor Management"
+        ],
+        "summary": "Delete Vendor Item",
+        "operationId": "delete_vendor_item_api_v1_vendors__vendor_id__delete",
+        "parameters": [
+          {
+            "name": "vendor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vendor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/guests": {
+      "get": {
+        "tags": [
+          "Guest Management"
+        ],
+        "summary": "Get Event Guests",
+        "operationId": "get_event_guests_api_v1_events__event_id__guests_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_GuestSummaryResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Guest Management"
+        ],
+        "summary": "Add Guest",
+        "operationId": "add_guest_api_v1_events__event_id__guests_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_GuestResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guests/{guest_id}": {
+      "put": {
+        "tags": [
+          "Guest Management"
+        ],
+        "summary": "Update Guest",
+        "operationId": "update_guest_api_v1_guests__guest_id__put",
+        "parameters": [
+          {
+            "name": "guest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Guest Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_GuestResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Guest Management"
+        ],
+        "summary": "Delete Guest",
+        "operationId": "delete_guest_api_v1_guests__guest_id__delete",
+        "parameters": [
+          {
+            "name": "guest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Guest Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/inspiration": {
+      "get": {
+        "tags": [
+          "Inspiration Studio"
+        ],
+        "summary": "Get Inspiration Cards",
+        "operationId": "get_inspiration_cards_api_v1_events__event_id__inspiration_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_List_InspirationCardResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/inspiration/generate": {
+      "post": {
+        "tags": [
+          "Inspiration Studio"
+        ],
+        "summary": "Generate Inspiration Ideas",
+        "description": "Generates creative ideas using AI Copilot and persists them as inspiration cards.",
+        "operationId": "generate_inspiration_ideas_api_v1_events__event_id__inspiration_generate_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspirationGenerateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_List_InspirationCardResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/inspiration/cards": {
+      "post": {
+        "tags": [
+          "Inspiration Studio"
+        ],
+        "summary": "Create Custom Inspiration Card",
+        "operationId": "create_custom_inspiration_card_api_v1_events__event_id__inspiration_cards_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspirationCardCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_InspirationCardResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inspiration/cards/{card_id}": {
+      "delete": {
+        "tags": [
+          "Inspiration Studio"
+        ],
+        "summary": "Delete Inspiration Card",
+        "operationId": "delete_inspiration_card_api_v1_inspiration_cards__card_id__delete",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Card Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard & Analytics"
+        ],
+        "summary": "Get Event Dashboard",
+        "operationId": "get_event_dashboard_api_v1_events__event_id__dashboard_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_EventDashboardMetrics_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIBudgetPlanResponse": {
+        "properties": {
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "total_budget": {
+            "type": "string",
+            "title": "Total Budget"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "INR"
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/AICategoryAllocation"
+            },
+            "type": "array",
+            "title": "Allocations"
+          },
+          "cost_saving_tips": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cost Saving Tips"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "Estimates are directional guidelines. Final prices depend on actual vendor quotes and local market rates."
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_type",
+          "total_budget",
+          "allocations",
+          "cost_saving_tips"
+        ],
+        "title": "AIBudgetPlanResponse"
+      },
+      "AICategoryAllocation": {
+        "properties": {
+          "category_name": {
+            "type": "string",
+            "title": "Category Name"
+          },
+          "percentage": {
+            "type": "string",
+            "title": "Percentage"
+          },
+          "suggested_amount": {
+            "type": "string",
+            "title": "Suggested Amount"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "recommended_items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommended Items",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_name",
+          "percentage",
+          "suggested_amount",
+          "rationale"
+        ],
+        "title": "AICategoryAllocation"
+      },
+      "AICopilotChatRequest": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "conversation_history": {
+            "items": {
+              "$ref": "#/components/schemas/AICopilotMessage"
+            },
+            "type": "array",
+            "title": "Conversation History",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "message"
+        ],
+        "title": "AICopilotChatRequest"
+      },
+      "AICopilotChatResponse": {
+        "properties": {
+          "response": {
+            "type": "string",
+            "title": "Response"
+          },
+          "suggested_actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggested Actions",
+            "default": []
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "gemini"
+          }
+        },
+        "type": "object",
+        "required": [
+          "response"
+        ],
+        "title": "AICopilotChatResponse"
+      },
+      "AICopilotEventGenerationRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "target_budget": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Target Budget"
+          },
+          "guest_count": {
+            "type": "integer",
+            "title": "Guest Count",
+            "default": 50
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "event_type",
+          "target_budget"
+        ],
+        "title": "AICopilotEventGenerationRequest"
+      },
+      "AICopilotFullPlanResponse": {
+        "properties": {
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "theme_recommendation": {
+            "type": "string",
+            "title": "Theme Recommendation"
+          },
+          "budget_breakdown": {
+            "$ref": "#/components/schemas/AIBudgetPlanResponse"
+          },
+          "timeline_plan": {
+            "$ref": "#/components/schemas/AITimelinePlanResponse"
+          },
+          "vendor_checklists": {
+            "items": {
+              "$ref": "#/components/schemas/AIVendorChecklistRecommendation"
+            },
+            "type": "array",
+            "title": "Vendor Checklists"
+          },
+          "inspiration_ideas": {
+            "items": {
+              "$ref": "#/components/schemas/AIInspirationIdea"
+            },
+            "type": "array",
+            "title": "Inspiration Ideas"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "gemini"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "theme_recommendation",
+          "budget_breakdown",
+          "timeline_plan",
+          "vendor_checklists",
+          "inspiration_ideas"
+        ],
+        "title": "AICopilotFullPlanResponse"
+      },
+      "AICopilotMessage": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "AICopilotMessage"
+      },
+      "AIInspirationIdea": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "category",
+          "description",
+          "tags"
+        ],
+        "title": "AIInspirationIdea"
+      },
+      "AIMilestonePlan": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "phase": {
+            "type": "string",
+            "title": "Phase"
+          },
+          "recommended_timeline": {
+            "type": "string",
+            "title": "Recommended Timeline"
+          },
+          "key_tasks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "phase",
+          "recommended_timeline",
+          "key_tasks"
+        ],
+        "title": "AIMilestonePlan"
+      },
+      "AITimelinePlanResponse": {
+        "properties": {
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/AIMilestonePlan"
+            },
+            "type": "array",
+            "title": "Milestones"
+          },
+          "day_of_schedule_sample": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Day Of Schedule Sample"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_type",
+          "milestones",
+          "day_of_schedule_sample"
+        ],
+        "title": "AITimelinePlanResponse"
+      },
+      "AIVendorChecklistRecommendation": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "recommended_checklist": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommended Checklist"
+          },
+          "questions_to_ask_vendor": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Questions To Ask Vendor"
+          },
+          "booking_urgency": {
+            "type": "string",
+            "title": "Booking Urgency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "recommended_checklist",
+          "questions_to_ask_vendor",
+          "booking_urgency"
+        ],
+        "title": "AIVendorChecklistRecommendation"
+      },
+      "BudgetCategoryCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "allocated_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Allocated Amount",
+            "default": "0.00"
+          },
+          "percentage_target": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Percentage Target",
+            "default": "0.00"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "BudgetCategoryCreate"
+      },
+      "BudgetCategoryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "allocated_amount": {
+            "type": "string",
+            "title": "Allocated Amount"
+          },
+          "percentage_target": {
+            "type": "string",
+            "title": "Percentage Target"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BudgetItemResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "default": []
+          },
+          "total_estimated": {
+            "type": "string",
+            "title": "Total Estimated",
+            "default": "0.00"
+          },
+          "total_actual": {
+            "type": "string",
+            "title": "Total Actual",
+            "default": "0.00"
+          },
+          "total_paid": {
+            "type": "string",
+            "title": "Total Paid",
+            "default": "0.00"
+          },
+          "variance": {
+            "type": "string",
+            "title": "Variance",
+            "default": "0.00"
+          },
+          "utilization_percentage": {
+            "type": "string",
+            "title": "Utilization Percentage",
+            "default": "0.00"
+          },
+          "is_over_allocated": {
+            "type": "boolean",
+            "title": "Is Over Allocated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "name",
+          "allocated_amount",
+          "percentage_target"
+        ],
+        "title": "BudgetCategoryResponse"
+      },
+      "BudgetCategoryUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "allocated_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allocated Amount"
+          },
+          "percentage_target": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percentage Target"
+          }
+        },
+        "type": "object",
+        "title": "BudgetCategoryUpdate"
+      },
+      "BudgetItemCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "estimated_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Estimated Cost",
+            "default": "0.00"
+          },
+          "actual_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Actual Cost",
+            "default": "0.00"
+          },
+          "paid_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Paid Amount",
+            "default": "0.00"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BudgetItemStatus",
+            "default": "ESTIMATED"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "category_id": {
+            "type": "string",
+            "title": "Category Id"
+          },
+          "is_ai_suggested": {
+            "type": "boolean",
+            "title": "Is Ai Suggested",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "category_id"
+        ],
+        "title": "BudgetItemCreate"
+      },
+      "BudgetItemResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "estimated_cost": {
+            "type": "string",
+            "title": "Estimated Cost",
+            "default": "0.00"
+          },
+          "actual_cost": {
+            "type": "string",
+            "title": "Actual Cost",
+            "default": "0.00"
+          },
+          "paid_amount": {
+            "type": "string",
+            "title": "Paid Amount",
+            "default": "0.00"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BudgetItemStatus",
+            "default": "ESTIMATED"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "category_id": {
+            "type": "string",
+            "title": "Category Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "is_ai_suggested": {
+            "type": "boolean",
+            "title": "Is Ai Suggested"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "id",
+          "category_id",
+          "event_id",
+          "is_ai_suggested",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "BudgetItemResponse"
+      },
+      "BudgetItemStatus": {
+        "type": "string",
+        "enum": [
+          "ESTIMATED",
+          "PENDING",
+          "PAID"
+        ],
+        "title": "BudgetItemStatus"
+      },
+      "BudgetItemUpdate": {
+        "properties": {
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "estimated_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Cost"
+          },
+          "actual_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Cost"
+          },
+          "paid_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid Amount"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BudgetItemStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "BudgetItemUpdate"
+      },
+      "BudgetOverviewResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "target_budget": {
+            "type": "string",
+            "title": "Target Budget"
+          },
+          "total_allocated": {
+            "type": "string",
+            "title": "Total Allocated"
+          },
+          "total_estimated": {
+            "type": "string",
+            "title": "Total Estimated"
+          },
+          "total_actual": {
+            "type": "string",
+            "title": "Total Actual"
+          },
+          "total_paid": {
+            "type": "string",
+            "title": "Total Paid"
+          },
+          "remaining_budget": {
+            "type": "string",
+            "title": "Remaining Budget"
+          },
+          "variance": {
+            "type": "string",
+            "title": "Variance"
+          },
+          "is_over_budget": {
+            "type": "boolean",
+            "title": "Is Over Budget"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "INR"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/BudgetCategoryResponse"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "target_budget",
+          "total_allocated",
+          "total_estimated",
+          "total_actual",
+          "total_paid",
+          "remaining_budget",
+          "variance",
+          "is_over_budget",
+          "categories"
+        ],
+        "title": "BudgetOverviewResponse"
+      },
+      "EventCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0,
+            "title": "Title",
+            "default": "",
+            "examples": [
+              "Sophia & Liam's Wedding"
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "examples": [
+              "Sophia & Liam's Wedding"
+            ]
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/EventType",
+            "examples": [
+              "WEDDING"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "examples": [
+              "Mumbai, India"
+            ]
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date",
+            "examples": [
+              "2026-11-20T10:00:00Z"
+            ]
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "examples": [
+              "2026-11-20T22:00:00Z"
+            ]
+          },
+          "expected_guest_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Guest Count",
+            "default": 0,
+            "examples": [
+              150
+            ]
+          },
+          "target_budget": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Target Budget",
+            "default": "0.00",
+            "examples": [
+              "2500000.00"
+            ]
+          },
+          "total_budget": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Budget",
+            "examples": [
+              "2500000.00"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "INR",
+            "examples": [
+              "INR"
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "PLANNING"
+          },
+          "event_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Date"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_type"
+        ],
+        "title": "EventCreate"
+      },
+      "EventDashboardMetrics": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventResponse"
+          },
+          "budget": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Budget"
+          },
+          "timeline": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Timeline"
+          },
+          "vendors": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Vendors"
+          },
+          "guests": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Guests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "budget",
+          "timeline",
+          "vendors",
+          "guests"
+        ],
+        "title": "EventDashboardMetrics"
+      },
+      "EventPaginationResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "EventPaginationResponse"
+      },
+      "EventResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "expected_guest_count": {
+            "type": "integer",
+            "title": "Expected Guest Count",
+            "default": 0
+          },
+          "target_budget": {
+            "type": "string",
+            "title": "Target Budget"
+          },
+          "total_budget": {
+            "type": "string",
+            "title": "Total Budget"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "event_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Date"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "name",
+          "event_type",
+          "target_budget",
+          "total_budget",
+          "currency",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "EventResponse"
+      },
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "PLANNING",
+          "CONFIRMED",
+          "IN_PROGRESS",
+          "COMPLETED",
+          "CANCELLED"
+        ],
+        "title": "EventStatus"
+      },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "WEDDING",
+          "BIRTHDAY",
+          "COMMUNITY",
+          "OTHER"
+        ],
+        "title": "EventType"
+      },
+      "EventUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "expected_guest_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Guest Count"
+          },
+          "target_budget": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Budget"
+          },
+          "total_budget": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Budget"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Date"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "EventUpdate"
+      },
+      "GuestCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "rsvp_status": {
+            "$ref": "#/components/schemas/RSVPStatus",
+            "default": "PENDING"
+          },
+          "plus_ones": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Plus Ones",
+            "default": 0
+          },
+          "dietary_restrictions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietary Restrictions"
+          },
+          "table_assignment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Assignment"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GuestCreate"
+      },
+      "GuestResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "rsvp_status": {
+            "$ref": "#/components/schemas/RSVPStatus",
+            "default": "PENDING"
+          },
+          "plus_ones": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Plus Ones",
+            "default": 0
+          },
+          "dietary_restrictions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietary Restrictions"
+          },
+          "table_assignment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Assignment"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "total_party_count": {
+            "type": "integer",
+            "title": "Total Party Count",
+            "default": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "event_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "GuestResponse"
+      },
+      "GuestSummaryResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "total_invitations": {
+            "type": "integer",
+            "title": "Total Invitations"
+          },
+          "total_attending_heads": {
+            "type": "integer",
+            "title": "Total Attending Heads"
+          },
+          "total_declined_heads": {
+            "type": "integer",
+            "title": "Total Declined Heads"
+          },
+          "total_pending_heads": {
+            "type": "integer",
+            "title": "Total Pending Heads"
+          },
+          "dietary_breakdown": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Dietary Breakdown"
+          },
+          "guests": {
+            "items": {
+              "$ref": "#/components/schemas/GuestResponse"
+            },
+            "type": "array",
+            "title": "Guests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "total_invitations",
+          "total_attending_heads",
+          "total_declined_heads",
+          "total_pending_heads",
+          "dietary_breakdown",
+          "guests"
+        ],
+        "title": "GuestSummaryResponse"
+      },
+      "GuestUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "rsvp_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RSVPStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plus_ones": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plus Ones"
+          },
+          "dietary_restrictions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietary Restrictions"
+          },
+          "table_assignment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Assignment"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "GuestUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthCheckResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "healthy"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "database_connected": {
+            "type": "boolean",
+            "title": "Database Connected"
+          },
+          "ai_provider_mode": {
+            "type": "string",
+            "title": "Ai Provider Mode"
+          },
+          "ai_circuit_breaker": {
+            "type": "string",
+            "title": "Ai Circuit Breaker"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment",
+          "database_connected",
+          "ai_provider_mode",
+          "ai_circuit_breaker"
+        ],
+        "title": "HealthCheckResponse"
+      },
+      "InspirationCardCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "is_saved": {
+            "type": "boolean",
+            "title": "Is Saved",
+            "default": true
+          },
+          "is_ai_generated": {
+            "type": "boolean",
+            "title": "Is Ai Generated",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "category",
+          "description"
+        ],
+        "title": "InspirationCardCreate"
+      },
+      "InspirationCardResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "is_saved": {
+            "type": "boolean",
+            "title": "Is Saved",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "is_ai_generated": {
+            "type": "boolean",
+            "title": "Is Ai Generated"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "category",
+          "description",
+          "id",
+          "event_id",
+          "is_ai_generated",
+          "created_at"
+        ],
+        "title": "InspirationCardResponse"
+      },
+      "InspirationGenerateRequest": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "description": "Optional focus: THEME, DECOR, ACTIVITY, FAVORS"
+          },
+          "custom_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Prompt",
+            "description": "User prompt or aesthetic notes"
+          },
+          "num_ideas": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Num Ideas",
+            "default": 4
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id"
+        ],
+        "title": "InspirationGenerateRequest"
+      },
+      "MilestoneStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "IN_PROGRESS",
+          "COMPLETED",
+          "DELAYED"
+        ],
+        "title": "MilestoneStatus"
+      },
+      "RSVPStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "ATTENDING",
+          "DECLINED"
+        ],
+        "title": "RSVPStatus"
+      },
+      "SeedCategoriesResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "created_count": {
+            "type": "integer",
+            "title": "Created Count"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/BudgetCategoryResponse"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "created_count",
+          "categories"
+        ],
+        "title": "SeedCategoriesResponse"
+      },
+      "StandardResponse_AIBudgetPlanResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AIBudgetPlanResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[AIBudgetPlanResponse]"
+      },
+      "StandardResponse_AICopilotChatResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AICopilotChatResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[AICopilotChatResponse]"
+      },
+      "StandardResponse_AICopilotFullPlanResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AICopilotFullPlanResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[AICopilotFullPlanResponse]"
+      },
+      "StandardResponse_AITimelinePlanResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AITimelinePlanResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[AITimelinePlanResponse]"
+      },
+      "StandardResponse_BudgetCategoryResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BudgetCategoryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[BudgetCategoryResponse]"
+      },
+      "StandardResponse_BudgetItemResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BudgetItemResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[BudgetItemResponse]"
+      },
+      "StandardResponse_BudgetOverviewResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BudgetOverviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[BudgetOverviewResponse]"
+      },
+      "StandardResponse_EventDashboardMetrics_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDashboardMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[EventDashboardMetrics]"
+      },
+      "StandardResponse_EventPaginationResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventPaginationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[EventPaginationResponse]"
+      },
+      "StandardResponse_EventResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[EventResponse]"
+      },
+      "StandardResponse_GuestResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GuestResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[GuestResponse]"
+      },
+      "StandardResponse_GuestSummaryResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GuestSummaryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[GuestSummaryResponse]"
+      },
+      "StandardResponse_InspirationCardResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InspirationCardResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[InspirationCardResponse]"
+      },
+      "StandardResponse_List_BudgetCategoryResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BudgetCategoryResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[List[BudgetCategoryResponse]]"
+      },
+      "StandardResponse_List_BudgetItemResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BudgetItemResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[List[BudgetItemResponse]]"
+      },
+      "StandardResponse_List_EventResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EventResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[List[EventResponse]]"
+      },
+      "StandardResponse_List_InspirationCardResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/InspirationCardResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[List[InspirationCardResponse]]"
+      },
+      "StandardResponse_NoneType_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[NoneType]"
+      },
+      "StandardResponse_SeedCategoriesResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SeedCategoriesResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[SeedCategoriesResponse]"
+      },
+      "StandardResponse_TimelineActivityResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineActivityResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[TimelineActivityResponse]"
+      },
+      "StandardResponse_TimelineMilestoneResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineMilestoneResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[TimelineMilestoneResponse]"
+      },
+      "StandardResponse_TimelineOverviewResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineOverviewResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[TimelineOverviewResponse]"
+      },
+      "StandardResponse_VendorItemResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VendorItemResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[VendorItemResponse]"
+      },
+      "StandardResponse_VendorSummaryResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Operation completed successfully"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VendorSummaryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "title": "StandardResponse[VendorSummaryResponse]"
+      },
+      "TimelineActivityCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "responsible_party": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsible Party"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "SCHEDULED"
+          },
+          "milestone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milestone Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "start_time"
+        ],
+        "title": "TimelineActivityCreate"
+      },
+      "TimelineActivityResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "responsible_party": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsible Party"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "SCHEDULED"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "milestone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milestone Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "start_time",
+          "id",
+          "event_id",
+          "milestone_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TimelineActivityResponse"
+      },
+      "TimelineMilestoneCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "phase": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Phase"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MilestoneStatus",
+            "default": "PENDING"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index",
+            "default": 0
+          },
+          "is_ai_suggested": {
+            "type": "boolean",
+            "title": "Is Ai Suggested",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "phase"
+        ],
+        "title": "TimelineMilestoneCreate"
+      },
+      "TimelineMilestoneResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "phase": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Phase"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MilestoneStatus",
+            "default": "PENDING"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index",
+            "default": 0
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "is_ai_suggested": {
+            "type": "boolean",
+            "title": "Is Ai Suggested"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "activities": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineActivityResponse"
+            },
+            "type": "array",
+            "title": "Activities",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "phase",
+          "id",
+          "event_id",
+          "is_ai_suggested",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TimelineMilestoneResponse"
+      },
+      "TimelineMilestoneUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phase"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MilestoneStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "order_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Index"
+          }
+        },
+        "type": "object",
+        "title": "TimelineMilestoneUpdate"
+      },
+      "TimelineOverviewResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "total_milestones": {
+            "type": "integer",
+            "title": "Total Milestones"
+          },
+          "completed_milestones": {
+            "type": "integer",
+            "title": "Completed Milestones"
+          },
+          "completion_percentage": {
+            "type": "number",
+            "title": "Completion Percentage"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineMilestoneResponse"
+            },
+            "type": "array",
+            "title": "Milestones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "total_milestones",
+          "completed_milestones",
+          "completion_percentage",
+          "milestones"
+        ],
+        "title": "TimelineOverviewResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VendorItemCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VendorStatus",
+            "default": "TODO"
+          },
+          "estimated_quote": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Quote"
+          },
+          "final_agreed_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Agreed Price"
+          },
+          "contract_signed": {
+            "type": "boolean",
+            "title": "Contract Signed",
+            "default": false
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "is_ai_suggested_checklist": {
+            "type": "boolean",
+            "title": "Is Ai Suggested Checklist",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "name"
+        ],
+        "title": "VendorItemCreate"
+      },
+      "VendorItemResponse": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "status": {
+            "$ref": "#/components/schemas/VendorStatus",
+            "default": "TODO"
+          },
+          "estimated_quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Quote"
+          },
+          "final_agreed_price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Agreed Price"
+          },
+          "contract_signed": {
+            "type": "boolean",
+            "title": "Contract Signed",
+            "default": false
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "is_ai_suggested_checklist": {
+            "type": "boolean",
+            "title": "Is Ai Suggested Checklist"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "name",
+          "id",
+          "event_id",
+          "is_ai_suggested_checklist",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "VendorItemResponse"
+      },
+      "VendorItemUpdate": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VendorStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estimated_quote": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Quote"
+          },
+          "final_agreed_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Agreed Price"
+          },
+          "contract_signed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Signed"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "VendorItemUpdate"
+      },
+      "VendorStatus": {
+        "type": "string",
+        "enum": [
+          "TODO",
+          "RESEARCHING",
+          "CONTACTED",
+          "HIRED",
+          "REJECTED"
+        ],
+        "title": "VendorStatus"
+      },
+      "VendorSummaryResponse": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "total_vendors": {
+            "type": "integer",
+            "title": "Total Vendors"
+          },
+          "hired_vendors": {
+            "type": "integer",
+            "title": "Hired Vendors"
+          },
+          "pending_vendors": {
+            "type": "integer",
+            "title": "Pending Vendors"
+          },
+          "total_contracted_spend": {
+            "type": "string",
+            "title": "Total Contracted Spend"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VendorItemResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "total_vendors",
+          "hired_vendors",
+          "pending_vendors",
+          "total_contracted_spend",
+          "items"
+        ],
+        "title": "VendorSummaryResponse"
+      }
+    }
+  }
+}
