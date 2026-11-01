@@ -1,7 +1,7 @@
 {
   "buildCommand": "cd frontend && pnpm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm install -g pnpm && cd frontend && pnpm install",
+  "installCommand": "npm config set allow-scripts true -g && npm install -g pnpm && pnpm -v && cd frontend && pnpm install --no-frozen-lockfile",
   "framework": "vite",
   "rewrites": [
     {
