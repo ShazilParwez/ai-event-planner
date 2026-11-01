@@ -1,0 +1,8 @@
+{
+  "name": "ai-event-planner",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.x"
+  }
+}

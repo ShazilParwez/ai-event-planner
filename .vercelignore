@@ -1,0 +1,7 @@
+backend/
+docker/
+backups/
+.git/
+.pytest_cache/
+*.db
+*.sqlite3
