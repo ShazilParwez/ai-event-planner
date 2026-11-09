@@ -1,7 +1,12 @@
 {
-  "buildCommand": "cd frontend && pnpm run build",
+  "build": {
+    "env": {
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
+  },
+  "buildCommand": "cd frontend && corepack pnpm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm config set allow-scripts true -g && npm install -g pnpm && pnpm -v && cd frontend && pnpm install --no-frozen-lockfile",
+  "installCommand": "corepack enable && cd frontend && corepack pnpm install --frozen-lockfile",
   "framework": "vite",
   "rewrites": [
     {
@@ -10,4 +15,3 @@
     }
   ]
 }
-
